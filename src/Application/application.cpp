@@ -26,6 +26,9 @@ xe::Application::Application(int width, int height, std::string title, int major
 
         window_ = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
         if (!window_) {
+            const char* error_desc;
+            auto err_code = glfwGetError(&error_desc);
+            std::cerr<<"Cannot create window: "<<error_desc<<"\n";
             glfwTerminate();
             exit(-1);
         }
