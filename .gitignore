@@ -34,3 +34,5 @@
 *.out
 *.app
 >>>>>>> 83a31361ef4dce9098f39910871bb138a4d1bb01
+
+cmake-build-debug/
