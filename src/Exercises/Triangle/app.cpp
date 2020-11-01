@@ -23,26 +23,40 @@ void SimpleShapeApplication::init() {
         std::cerr << std::string(PROJECT_DIR) + "/shaders/base_fs.glsl" << " shader files" << std::endl;
     }
 
-    std::vector<GLfloat> vertices = {
-            -0.5f, 0.0f, 0.0f,
-            0.5f, 0.0f, 0.0f,
-            0.0f, 0.5f, 0.0f
+    std::vector<GLfloat> vertices{
+        -0.5, -0.5, 0.0,
+         0.5, -0.5, 0.0,
+        -0.5, 0.5, 0.0,
+         0.5, 0.5, 0.0
     };
 
-    GLuint v_buffer_handle;
-    glGenBuffers(1, &v_buffer_handle);
-    glBindBuffer(GL_ARRAY_BUFFER, v_buffer_handle);
+    GLuint vbo_handle;
+    glGenBuffers(1, &vbo_handle);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_handle);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 
+    std::vector<GLushort> indices = {0,1,2, 1,3,2};
+
+    GLuint ibo_handle;
+    glGenBuffers(1, &ibo_handle);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_handle);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLushort), indices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+
     glGenVertexArrays(1, &vao_);
     glBindVertexArray(vao_);
-    glBindBuffer(GL_ARRAY_BUFFER, v_buffer_handle);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vao_);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(0));
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_handle);
     glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 
     glClearColor(0.81f, 0.81f, 0.8f, 1.0f);
@@ -56,6 +70,6 @@ void SimpleShapeApplication::init() {
 
 void SimpleShapeApplication::frame() {
     glBindVertexArray(vao_);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, reinterpret_cast<GLvoid *>(0));
     glBindVertexArray(0);
 }
