@@ -26,6 +26,8 @@ void SimpleShapeApplication::init() {
         std::cerr << std::string(PROJECT_DIR) + "/shaders/base_fs.glsl" << " shader files" << std::endl;
     }
 
+    set_camera(new Camera());
+
     std::vector<GLfloat> vertices{
             // front
             -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
@@ -130,16 +132,16 @@ void SimpleShapeApplication::preparePVM(GLuint program) {
     glm::vec3 eye = glm::vec3(-1.0, 1.0, -1.0); // pos of camera
     glm::vec3 center = glm::vec3(0.0, 0.0, 0.0); // where camera looks at
     glm::vec3 up = glm::vec3(0.0, 1.0, 0.0); // what is 'up' axis for camera
+    camera()->look_at(eye, center, up);
 
     int w, h;
     std::tie(w, h) = frame_buffer_size();
-    aspect_ = (float)w/h;
-    fov_ = glm::pi<float>()/4.0;
-    near_ = 0.1f;
-    far_ = 100.0f;
 
-    P_ = glm::perspective(fov_, aspect_, near_, far_);
-    V_ = glm::lookAt(eye, center, up);
+    float aspect = (float)w/h;
+    float fov = glm::pi<float>()/4.0;
+    float near = 0.1f;
+    float far = 100.0f;
+    camera()->perspective(fov, aspect, near, far);
     glm::mat4 M(1.0f); // model
 
 
@@ -150,7 +152,7 @@ void SimpleShapeApplication::preparePVM(GLuint program) {
 }
 
 void SimpleShapeApplication::frame() {
-    glm::mat4 PVM = P_ * V_;
+    glm::mat4 PVM = camera()->projection() * camera()->view();
     glUniformMatrix4fv(u_pvm_buffer_, 1, false, glm::value_ptr(PVM));
 
     glBindVertexArray(vao_);
@@ -162,6 +164,6 @@ void SimpleShapeApplication::frame() {
 void SimpleShapeApplication::framebuffer_resize_callback(int w, int h) {
     Application::framebuffer_resize_callback(w, h);
     glViewport(0,0,w,h);
-    aspect_ = (float) w / h;
-    P_ = glm::perspective(fov_, aspect_, near_, far_);
+    float aspect = (float) w / h;
+    camera()->set_aspect(aspect);
 }
