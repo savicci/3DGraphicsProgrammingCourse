@@ -126,28 +126,42 @@ void SimpleShapeApplication::init() {
     preparePVM(program);
 }
 
-void SimpleShapeApplication::preparePVM(GLuint program) const {
-    glm::vec3 eye = glm::vec3(-0.5, 0.5, -1.0); // pos of camera
+void SimpleShapeApplication::preparePVM(GLuint program) {
+    glm::vec3 eye = glm::vec3(-1.0, 1.0, -1.0); // pos of camera
     glm::vec3 center = glm::vec3(0.0, 0.0, 0.0); // where camera looks at
     glm::vec3 up = glm::vec3(0.0, 1.0, 0.0); // what is 'up' axis for camera
 
+    int w, h;
+    std::tie(w, h) = frame_buffer_size();
+    aspect_ = (float)w/h;
+    fov_ = glm::pi<float>()/4.0;
+    near_ = 0.1f;
+    far_ = 100.0f;
+
+    P_ = glm::perspective(fov_, aspect_, near_, far_);
+    V_ = glm::lookAt(eye, center, up);
     glm::mat4 M(1.0f); // model
-    glm::mat4 V = glm::lookAt(eye, center, up); // view
-    glm::mat4 P = glm::perspective(glm::radians(90.0), 1.0, 0.1, 100.0); // projection
-
-    glm::mat4 PVM = P * V * M;
 
 
-    int matrix_location = glGetUniformLocation(program, "proj_matrix");
-    if (matrix_location != 0) {
+    u_pvm_buffer_ = glGetUniformLocation(program, "proj_matrix");
+    if (u_pvm_buffer_ != 0) {
         std::cerr << "Error occurred while trying to find uniform proj_matrix" << std::endl;
     }
-    glUniformMatrix4fv(matrix_location, 1, false, glm::value_ptr(PVM));
 }
 
 void SimpleShapeApplication::frame() {
+    glm::mat4 PVM = P_ * V_;
+    glUniformMatrix4fv(u_pvm_buffer_, 1, false, glm::value_ptr(PVM));
+
     glBindVertexArray(vao_);
     glEnable(GL_DEPTH_TEST);
     glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, (void*)nullptr);
     glBindVertexArray(0);
+}
+
+void SimpleShapeApplication::framebuffer_resize_callback(int w, int h) {
+    Application::framebuffer_resize_callback(w, h);
+    glViewport(0,0,w,h);
+    aspect_ = (float) w / h;
+    P_ = glm::perspective(fov_, aspect_, near_, far_);
 }

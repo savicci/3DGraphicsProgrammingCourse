@@ -6,6 +6,7 @@
 #pragma once
 
 #include <vector>
+#include <glm/mat4x4.hpp>
 
 
 #include "Application/application.h"
@@ -22,11 +23,21 @@ public:
 
     void frame() override;
 
+    void framebuffer_resize_callback(int w, int h) override;
+
 private:
     GLuint vao_;
+    float fov_;
+    float aspect_;
+    float near_;
+    float far_;
 
+    glm::mat4 P_;
+    glm::mat4 V_;
+
+    GLuint u_pvm_buffer_;
 
     void addPVMMatrix();
 
-    void preparePVM(GLuint program) const;
+    void preparePVM(GLuint program);
 };
