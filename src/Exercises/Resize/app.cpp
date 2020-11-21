@@ -162,7 +162,6 @@ void SimpleShapeApplication::preparePVM(GLuint program) {
 
 void SimpleShapeApplication::frame() {
     glm::mat4 PVM = P_ * V_;
-    glUniformMatrix4fv(u_pvm_buffer_, 1, false, glm::value_ptr(PVM));
 
     glBindVertexArray(vao_);
     glEnable(GL_DEPTH_TEST);
