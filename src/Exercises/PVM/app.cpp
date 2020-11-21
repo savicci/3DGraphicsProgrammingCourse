@@ -76,10 +76,10 @@ void SimpleShapeApplication::init() {
     float light[3] = {0.6, 0.4, 0.6};
 
     GLuint ubo_handle(0u);
-    glGenBuffers(1,&ubo_handle);
+    glGenBuffers(1, &ubo_handle);
     glBindBuffer(GL_UNIFORM_BUFFER, ubo_handle);
     glBufferData(GL_UNIFORM_BUFFER, 8 * sizeof(float), nullptr, GL_STATIC_DRAW);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, 8 * sizeof(float), &strength);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(float), &strength);
     glBufferSubData(GL_UNIFORM_BUFFER, 4 * sizeof(float), 3 * sizeof(float), light);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubo_handle);
@@ -100,23 +100,29 @@ void SimpleShapeApplication::init() {
         glUniformBlockBinding(program, u_modifiers_index, 0);
     }
 
-
     glm::vec3 eye = glm::vec3(1.0, 0.0, -1.0); // pos of camera
     glm::vec3 center = glm::vec3(0.0, 0.0, 0.0); // where camera looks at
     glm::vec3 up = glm::vec3(0.0, 1.0, 0.0); // what is 'up' axis for camera
 
     glm::mat4 M(1.0f); // model
     glm::mat4 V = glm::lookAt(eye, center, up); // view
-    glm::mat4 P = glm::perspective(glm::radians(90.0) , 1.0, 0.1, 100.0); // projection
+    glm::mat4 P = glm::perspective(glm::radians(90.0), 1.0, 0.1, 100.0); // projection
 
-    glm::mat4 PVM = P*V*M;
+    glm::mat4 PVM = P * V * M;
 
+    glGenBuffers(1, &ubo_handle);
+    glBindBuffer(GL_UNIFORM_BUFFER, ubo_handle);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(PVM), nullptr, GL_STATIC_DRAW);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(PVM), &PVM[0]);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubo_handle);
 
-    int matrix_location = glGetUniformLocation(program, "proj_matrix");
-    if (matrix_location != 0){
-        std::cerr << "Error occurred while trying to find uniform proj_matrix" << std::endl;
+    auto u_pvm_index = glGetUniformBlockIndex(program, "PVM");
+    if (u_pvm_index == GL_INVALID_INDEX) {
+        std::cout << "Cannot find PVM uniform block in program" << std::endl;
+    } else {
+        glUniformBlockBinding(program, u_pvm_index, 1);
     }
-    glUniformMatrix4fv(matrix_location, 1, false, glm::value_ptr(PVM));
 }
 
 void SimpleShapeApplication::frame() {
