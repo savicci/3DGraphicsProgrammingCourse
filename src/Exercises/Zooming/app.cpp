@@ -143,6 +143,11 @@ void SimpleShapeApplication::preparePVM(GLuint program) {
     float near = 0.1f;
     float far = 100.0f;
     camera()->perspective(fov, aspect, near, far);
+
+    u_pvm_buffer_ = glGetUniformBlockIndex(program_, "PVM");
+    if (u_pvm_buffer_ == GL_INVALID_INDEX) {
+        std::cout << "Cannot find PVM uniform block in program" << std::endl;
+    }
 }
 
 void SimpleShapeApplication::frame() {
@@ -164,12 +169,7 @@ void SimpleShapeApplication::setPVMUniformBufferData(const glm::mat4 &PVM) {
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
     glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubo_handle);
 
-    u_pvm_buffer_ = glGetUniformBlockIndex(program_, "PVM");
-    if (u_pvm_buffer_ == GL_INVALID_INDEX) {
-        std::cout << "Cannot find PVM uniform block in program" << std::endl;
-    } else {
-        glUniformBlockBinding(program_, u_pvm_buffer_, 1);
-    }
+    glUniformBlockBinding(program_, u_pvm_buffer_, 1);
 }
 
 void SimpleShapeApplication::framebuffer_resize_callback(int w, int h) {

@@ -5,7 +5,9 @@ layout(location=1) in vec3 a_vertex_color;
 
 out vec3 vertex_color;
 
-uniform mat4 proj_matrix;
+uniform PVM {
+    mat4 proj_matrix;
+};
 
 void main() {
     gl_Position = proj_matrix * a_vertex_position;

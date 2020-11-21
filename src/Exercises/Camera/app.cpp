@@ -26,6 +26,7 @@ void SimpleShapeApplication::init() {
         std::cerr << std::string(PROJECT_DIR) + "/shaders/base_fs.glsl" << " shader files" << std::endl;
     }
 
+    program_ = program;
     set_camera(new Camera());
     set_controler(new CameraControler(camera()));
 
@@ -52,18 +53,18 @@ void SimpleShapeApplication::init() {
 
             // bottom
             -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f,
-             0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f,
+            0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f,
             -0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 1.0f,
-             0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 1.0f
+            0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 1.0f
     };
 
     unsigned int indices[] = {
-            0,1,2,
-            3,4,5,
-            6,7,8,
-            9,10,11,
-            12,13,14,
-            13,14,15
+            0, 1, 2,
+            3, 4, 5,
+            6, 7, 8,
+            9, 10, 11,
+            12, 13, 14,
+            13, 14, 15
     };
 
     GLuint vbo_handle;
@@ -106,7 +107,7 @@ void SimpleShapeApplication::init() {
     glGenBuffers(1, &ubo_handle);
     glBindBuffer(GL_UNIFORM_BUFFER, ubo_handle);
     glBufferData(GL_UNIFORM_BUFFER, 8 * sizeof(float), nullptr, GL_STATIC_DRAW);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, 8 * sizeof(float), &strength);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(float), &strength);
     glBufferSubData(GL_UNIFORM_BUFFER, 4 * sizeof(float), 3 * sizeof(float), light);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubo_handle);
@@ -126,10 +127,10 @@ void SimpleShapeApplication::init() {
     } else {
         glUniformBlockBinding(program, u_modifiers_index, 0);
     }
-    preparePVM(program);
+    preparePVM();
 }
 
-void SimpleShapeApplication::preparePVM(GLuint program) {
+void SimpleShapeApplication::preparePVM() {
     glm::vec3 eye = glm::vec3(-1.0, 1.0, -1.0); // pos of camera
     glm::vec3 center = glm::vec3(0.0, 0.0, 0.0); // where camera looks at
     glm::vec3 up = glm::vec3(0.0, 1.0, 0.0); // what is 'up' axis for camera
@@ -138,33 +139,43 @@ void SimpleShapeApplication::preparePVM(GLuint program) {
     int w, h;
     std::tie(w, h) = frame_buffer_size();
 
-    float aspect = (float)w/h;
-    float fov = glm::pi<float>()/4.0;
+    float aspect = (float) w / h;
+    float fov = glm::pi<float>() / 4.0;
     float near = 0.1f;
     float far = 100.0f;
     camera()->perspective(fov, aspect, near, far);
-    glm::mat4 M(1.0f); // model
 
-
-    u_pvm_buffer_ = glGetUniformLocation(program, "proj_matrix");
-    if (u_pvm_buffer_ != 0) {
-        std::cerr << "Error occurred while trying to find uniform proj_matrix" << std::endl;
+    u_pvm_buffer_ = glGetUniformBlockIndex(program_, "PVM");
+    if (u_pvm_buffer_ == GL_INVALID_INDEX) {
+        std::cout << "Cannot find PVM uniform block in program" << std::endl;
     }
 }
 
 void SimpleShapeApplication::frame() {
     glm::mat4 PVM = camera()->projection() * camera()->view();
-    glUniformMatrix4fv(u_pvm_buffer_, 1, false, glm::value_ptr(PVM));
+    setPVMUniformBufferData(PVM);
 
     glBindVertexArray(vao_);
     glEnable(GL_DEPTH_TEST);
-    glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, (void*)nullptr);
+    glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, (void *) nullptr);
     glBindVertexArray(0);
+}
+
+void SimpleShapeApplication::setPVMUniformBufferData(const glm::mat4 &PVM) const {
+    unsigned int ubo_handle(1u);
+    glGenBuffers(1, &ubo_handle);
+    glBindBuffer(GL_UNIFORM_BUFFER, ubo_handle);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(PVM), nullptr, GL_STATIC_DRAW);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(PVM), &PVM[0]);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubo_handle);
+
+    glUniformBlockBinding(program_, u_pvm_buffer_, 1);
 }
 
 void SimpleShapeApplication::framebuffer_resize_callback(int w, int h) {
     Application::framebuffer_resize_callback(w, h);
-    glViewport(0,0,w,h);
+    glViewport(0, 0, w, h);
     float aspect = (float) w / h;
     camera()->set_aspect(aspect);
 }

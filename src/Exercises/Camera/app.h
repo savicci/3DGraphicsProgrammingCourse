@@ -48,8 +48,8 @@ private:
     GLuint u_pvm_buffer_;
     Camera *camera_;
     CameraControler *controler_;
+    unsigned int program_;
 
-    void addPVMMatrix();
-
-    void preparePVM(GLuint program);
+    void preparePVM();
+    void setPVMUniformBufferData(const glm::mat4 &PVM) const;
 };
