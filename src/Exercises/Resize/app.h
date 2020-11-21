@@ -37,7 +37,5 @@ private:
 
     GLuint u_pvm_buffer_;
 
-    void addPVMMatrix();
-
     void preparePVM(GLuint program);
 };
