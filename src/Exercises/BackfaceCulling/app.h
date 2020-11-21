@@ -27,5 +27,5 @@ private:
 
     void addPVMMatrix();
 
-    void preparePVM(GLuint program) const;
+    void preparePVM(GLuint program, int w, int h) const;
 };
