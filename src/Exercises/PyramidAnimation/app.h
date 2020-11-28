@@ -15,6 +15,8 @@
 #include "glad/glad.h"
 #include "camera.h"
 #include "camera_controller.h"
+#include "pyramid.h"
+#include <chrono>
 
 class SimpleShapeApplication : public xe::Application {
 public:
@@ -43,12 +45,18 @@ public:
         delete camera_;
     }
 
+    glm::mat4 prepareMatrix(float elapsed_time);
+
+    std::shared_ptr<Pyramid> pyramid_;
+
 private:
     GLuint vao_;
     GLuint u_pvm_buffer_;
     Camera *camera_;
     CameraControler *controler_;
     unsigned int program_;
+    std::chrono::steady_clock::time_point start_;
+    float rotation_period;
 
     void preparePVM();
     void setPVMUniformBufferData(const glm::mat4 &PVM) const;

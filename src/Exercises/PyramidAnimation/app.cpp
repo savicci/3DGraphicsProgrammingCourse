@@ -29,89 +29,8 @@ void SimpleShapeApplication::init() {
     program_ = program;
     set_camera(new Camera());
     set_controler(new CameraControler(camera()));
-
-    std::vector<GLfloat> vertices{
-            // front
-            -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
-            0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
-            0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-
-            // left
-            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-            -0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-            0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-
-            // right
-            0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
-            0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-            0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
-
-            // back
-            -0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 0.0f,
-            0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 0.0f,
-            0.0f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f,
-
-            // bottom
-            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f,
-            0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f,
-            -0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 1.0f,
-            0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 1.0f
-    };
-
-    unsigned int indices[] = {
-            0, 1, 2,
-            3, 4, 5,
-            6, 7, 8,
-            9, 10, 11,
-            12, 13, 14,
-            13, 14, 15
-    };
-
-    GLuint vbo_handle;
-    glGenBuffers(1, &vbo_handle);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_handle);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glGenVertexArrays(1, &vao_);
-    glBindVertexArray(vao_);
-    glBindBuffer(GL_ARRAY_BUFFER, vao_);
-
-    // position
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(0));
-
-    // color
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat),
-                          reinterpret_cast<GLvoid *>(3 * sizeof(GLfloat)));
-
-
-    unsigned int ibo;
-    glGenBuffers(1, &ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBindVertexArray(0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-    // uniforms
-    float strength = 0.3f;
-    float light[3] = {0.6, 0.4, 0.6};
-
-    GLuint ubo_handle(0u);
-    glGenBuffers(1, &ubo_handle);
-    glBindBuffer(GL_UNIFORM_BUFFER, ubo_handle);
-    glBufferData(GL_UNIFORM_BUFFER, 8 * sizeof(float), nullptr, GL_STATIC_DRAW);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(float), &strength);
-    glBufferSubData(GL_UNIFORM_BUFFER, 4 * sizeof(float), 3 * sizeof(float), light);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubo_handle);
-
+    pyramid_ = std::make_shared<Pyramid>();
+    rotation_period = 4.0;
 
     glClearColor(0.81f, 0.81f, 0.8f, 1.0f);
     int w, h;
@@ -121,17 +40,12 @@ void SimpleShapeApplication::init() {
     glEnable(GL_DEPTH_TEST);
     glUseProgram(program);
 
-    auto u_modifiers_index = glGetUniformBlockIndex(program, "Modifiers");
-    if (u_modifiers_index == GL_INVALID_INDEX) {
-        std::cout << "Cannot find Modifiers uniform block in program" << std::endl;
-    } else {
-        glUniformBlockBinding(program, u_modifiers_index, 0);
-    }
     preparePVM();
+    start_ = std::chrono::steady_clock::now();
 }
 
 void SimpleShapeApplication::preparePVM() {
-    glm::vec3 eye = glm::vec3(-1.0, 1.0, -1.0); // pos of camera
+    glm::vec3 eye = glm::vec3(3.0, 18.0, -5.0); // pos of camera
     glm::vec3 center = glm::vec3(0.0, 0.0, 0.0); // where camera looks at
     glm::vec3 up = glm::vec3(0.0, 1.0, 0.0); // what is 'up' axis for camera
     camera()->look_at(eye, center, up);
@@ -140,7 +54,7 @@ void SimpleShapeApplication::preparePVM() {
     std::tie(w, h) = frame_buffer_size();
 
     float aspect = (float) w / h;
-    float fov = glm::pi<float>() / 4.0;
+    float fov = glm::pi<float>() / 2.0;
     float near = 0.1f;
     float far = 100.0f;
     camera()->perspective(fov, aspect, near, far);
@@ -152,13 +66,35 @@ void SimpleShapeApplication::preparePVM() {
 }
 
 void SimpleShapeApplication::frame() {
-    glm::mat4 PVM = camera()->projection() * camera()->view();
-    setPVMUniformBufferData(PVM);
+    auto now = std::chrono::steady_clock::now();
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::duration<float>>(now - start_).count();
 
-    glBindVertexArray(vao_);
-    glEnable(GL_DEPTH_TEST);
-    glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, (void *) nullptr);
-    glBindVertexArray(0);
+    glm::mat4 PVM = prepareMatrix(elapsed_time);
+    setPVMUniformBufferData(PVM);
+    pyramid_->draw();
+}
+
+glm::mat4 SimpleShapeApplication::prepareMatrix(float elapsed_time) {
+    auto rotation_angle = 2.0f * glm::pi<float>() * elapsed_time / rotation_period;
+
+    auto axis = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::rotate(glm::mat4(1.0f), rotation_angle, axis);
+
+    float a = 20;
+    float b = 8;
+    float orbital_rotation_period = 20.0f;
+    float orbital_rotation_angle = 2.0f * glm::pi<float>() * elapsed_time / orbital_rotation_period;
+    float x = a * cos(orbital_rotation_angle);
+    float z = b * sin(orbital_rotation_angle);
+    auto O = glm::translate(glm::mat4(1.0f), glm::vec3{x, 0.0, z});
+
+    glm::mat4 R = glm::rotate(glm::mat4(1.0f), glm::radians(0.f), glm::vec3(1.0f, 0.0f, 0.0f));
+    R = glm::rotate(R, glm::radians(0.f), glm::vec3(0.0f, 1.0f, 0.0f));
+    R = glm::rotate(R, glm::radians(0.f), glm::vec3(0.0f, 0.0f, 1.0f));
+
+    glm::mat4 M = O * R;
+
+    return camera()->projection() * camera()->view() * M;
 }
 
 void SimpleShapeApplication::setPVMUniformBufferData(const glm::mat4 &PVM) const {
