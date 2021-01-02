@@ -72,6 +72,36 @@ void SimpleShapeApplication::frame() {
     glm::mat4 PVM = prepareMatrix(elapsed_time);
     setPVMUniformBufferData(PVM);
     pyramid_->draw();
+
+    glm::mat4 PVM2 = prepareMoon(elapsed_time);
+    setPVMUniformBufferData(PVM2);
+    pyramid_->draw();
+}
+
+glm::mat4 SimpleShapeApplication::prepareMoon(float elapsed_time) {
+    auto rotation_angle = 2.0f * glm::pi<float>() * elapsed_time / 3.0f;
+
+    auto axis = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::rotate(glm::mat4(1.0f), rotation_angle, axis);
+
+    float a = 20;
+    float b = 8;
+    float orbital_rotation_period = 20.0f;
+    float orbital_rotation_angle = 2.0f * glm::pi<float>() * elapsed_time / orbital_rotation_period;
+    float x = a * cos(orbital_rotation_angle);
+    float z = b * sin(orbital_rotation_angle);
+    auto O = glm::translate(glm::mat4(1.0f), glm::vec3{x, 0.0, z});
+
+    glm::mat4 R = glm::rotate(glm::mat4(1.0f), glm::radians(0.f), glm::vec3(1.0f, 0.0f, 0.0f));
+    R = glm::rotate(R, glm::radians(0.f), glm::vec3(0.0f, 1.0f, 0.0f));
+    R = glm::rotate(R, glm::radians(0.f), glm::vec3(0.0f, 0.0f, 1.0f));
+
+    glm::mat4 O_moon(1.0f);
+
+    glm::mat4 S(0.5f);
+    glm::mat4 M = O * O_moon * R * S;
+
+    return camera()->projection() * camera()->view() * M;
 }
 
 glm::mat4 SimpleShapeApplication::prepareMatrix(float elapsed_time) {

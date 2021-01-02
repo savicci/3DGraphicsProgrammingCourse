@@ -46,6 +46,7 @@ public:
     }
 
     glm::mat4 prepareMatrix(float elapsed_time);
+    glm::mat4 prepareMoon(float elapsed_time);
 
     std::shared_ptr<Pyramid> pyramid_;
 
