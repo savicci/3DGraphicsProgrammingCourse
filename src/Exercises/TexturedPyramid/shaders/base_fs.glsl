@@ -1,7 +1,9 @@
 #version 410
 
 layout(location=0) out vec4 vFragColor;
-in vec3 vertex_color;
+in vec2 vertex_color;
+
+uniform sampler2D diffuse_map;
 
 layout(std140) uniform Modifiers {
     float strength;
@@ -9,6 +11,6 @@ layout(std140) uniform Modifiers {
 };
 
 void main() {
-    vFragColor.a = 1.0;
-    vFragColor.rgb = strength*light*vertex_color.rgb;
+
+    vFragColor = texture(diffuse_map, vertex_color);
 }

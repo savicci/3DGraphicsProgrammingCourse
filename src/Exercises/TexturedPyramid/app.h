@@ -15,6 +15,7 @@
 #include "glad/glad.h"
 #include "camera.h"
 #include "camera_controller.h"
+#include "pyramid.h"
 
 class SimpleShapeApplication : public xe::Application {
 public:
@@ -42,6 +43,8 @@ public:
     ~SimpleShapeApplication() {
         delete camera_;
     }
+
+    std::shared_ptr<Pyramid> pyramid_;
 
 private:
     GLuint vao_;
