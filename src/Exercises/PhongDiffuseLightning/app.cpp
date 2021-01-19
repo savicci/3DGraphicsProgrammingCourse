@@ -29,7 +29,7 @@ void SimpleShapeApplication::init() {
     program_ = program;
     set_camera(new Camera());
     set_controler(new CameraControler(camera()));
-    pyramid_ = std::make_shared<Pyramid>();
+    quad = new Quad();
 
     // uniforms
     float strength = 0.3f;
@@ -72,7 +72,7 @@ void SimpleShapeApplication::init() {
 }
 
 void SimpleShapeApplication::preparePVM() {
-    glm::vec3 eye = glm::vec3(-1.0, 1.0, -1.0); // pos of camera
+    glm::vec3 eye = glm::vec3(-3.0, 1.0, -3.0); // pos of camera
     glm::vec3 center = glm::vec3(0.0, 0.0, 0.0); // where camera looks at
     glm::vec3 up = glm::vec3(0.0, 1.0, 0.0); // what is 'up' axis for camera
     camera()->look_at(eye, center, up);
@@ -95,7 +95,7 @@ void SimpleShapeApplication::preparePVM() {
 void SimpleShapeApplication::frame() {
     glm::mat4 PVM = camera()->projection() * camera()->view();
     setPVMUniformBufferData(PVM);
-    pyramid_->draw();
+    quad->draw();
 }
 
 void SimpleShapeApplication::setPVMUniformBufferData(const glm::mat4 &PVM) const {

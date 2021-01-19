@@ -15,7 +15,8 @@
 #include "glad/glad.h"
 #include "camera.h"
 #include "camera_controller.h"
-#include "pyramid.h"
+
+#include "quad.h"
 
 class SimpleShapeApplication : public xe::Application {
 public:
@@ -42,9 +43,8 @@ public:
 
     ~SimpleShapeApplication() {
         delete camera_;
+        delete quad;
     }
-
-    std::shared_ptr<Pyramid> pyramid_;
 
 private:
     GLuint vao_;
@@ -52,6 +52,7 @@ private:
     Camera *camera_;
     CameraControler *controler_;
     unsigned int program_;
+    Quad *quad;
 
     void preparePVM();
     void setPVMUniformBufferData(const glm::mat4 &PVM) const;
