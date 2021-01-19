@@ -62,11 +62,11 @@ void SimpleShapeApplication::init() {
 
     preparePVM();
 
-    auto  u_diffuse_map_location = glGetUniformLocation(program,"diffuse_map");
-    if(u_diffuse_map_location==-1) {
-        std::cerr<<"Cannot find uniform diffuse_map\n";
+    auto u_diffuse_map_location = glGetUniformLocation(program, "diffuse_map");
+    if (u_diffuse_map_location == -1) {
+        std::cerr << "Cannot find uniform diffuse_map\n";
     } else {
-        glUniform1ui(u_diffuse_map_location,0);
+        glUniform1ui(u_diffuse_map_location, 0);
     }
 
 }
@@ -99,15 +99,21 @@ void SimpleShapeApplication::frame() {
 
 void SimpleShapeApplication::setPVMUniformBufferData() const {
     glm::mat4 P = camera_->projection();
-    glm::mat4 V = camera_->view();
+    glm::mat4 VM = camera_->view();
 
+    auto R = glm::mat3(VM);
+    auto N = glm::transpose(glm::inverse(R));
 
     unsigned int ubo_handle(1u);
     glGenBuffers(1, &ubo_handle);
     glBindBuffer(GL_UNIFORM_BUFFER, ubo_handle);
     glBufferData(GL_UNIFORM_BUFFER, 3 * sizeof(P), nullptr, GL_STATIC_DRAW);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(P), &P[0]);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(P), sizeof(V), &V[0]);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(P), sizeof(VM), &VM[0]);
+
+    glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(P), sizeof(N[0]), &N[0]);
+    glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(P) + sizeof(N[0]), sizeof(N[1]), &N[1]);
+    glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(P) + 2 * sizeof(N[0]), sizeof(N[2]), &N[2]);
 
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
     glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubo_handle);
