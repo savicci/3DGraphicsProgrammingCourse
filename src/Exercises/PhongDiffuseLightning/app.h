@@ -55,5 +55,5 @@ private:
     Quad *quad;
 
     void preparePVM();
-    void setPVMUniformBufferData(const glm::mat4 &PVM) const;
+    void setPVMUniformBufferData() const;
 };

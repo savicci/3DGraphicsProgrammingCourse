@@ -86,24 +86,29 @@ void SimpleShapeApplication::preparePVM() {
     float far = 100.0f;
     camera()->perspective(fov, aspect, near, far);
 
-    u_pvm_buffer_ = glGetUniformBlockIndex(program_, "PVM");
+    u_pvm_buffer_ = glGetUniformBlockIndex(program_, "Transformations");
     if (u_pvm_buffer_ == GL_INVALID_INDEX) {
-        std::cout << "Cannot find PVM uniform block in program" << std::endl;
+        std::cout << "Cannot find Transformations uniform block in program" << std::endl;
     }
 }
 
 void SimpleShapeApplication::frame() {
-    glm::mat4 PVM = camera()->projection() * camera()->view();
-    setPVMUniformBufferData(PVM);
+    setPVMUniformBufferData();
     quad->draw();
 }
 
-void SimpleShapeApplication::setPVMUniformBufferData(const glm::mat4 &PVM) const {
+void SimpleShapeApplication::setPVMUniformBufferData() const {
+    glm::mat4 P = camera_->projection();
+    glm::mat4 V = camera_->view();
+
+
     unsigned int ubo_handle(1u);
     glGenBuffers(1, &ubo_handle);
     glBindBuffer(GL_UNIFORM_BUFFER, ubo_handle);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(PVM), nullptr, GL_STATIC_DRAW);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(PVM), &PVM[0]);
+    glBufferData(GL_UNIFORM_BUFFER, 3 * sizeof(P), nullptr, GL_STATIC_DRAW);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(P), &P[0]);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(P), sizeof(V), &V[0]);
+
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
     glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubo_handle);
 
