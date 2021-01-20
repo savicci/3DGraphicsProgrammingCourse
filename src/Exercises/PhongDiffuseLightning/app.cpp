@@ -34,6 +34,7 @@ void SimpleShapeApplication::init() {
     light_.position = glm::vec4(0.0, 2.0, 0.0, 1.0);
     light_.color = glm::vec4(1.0, 1.0, 1.0, 1.0);
     light_.a = glm::vec4(0.3, 0.3, 0.0, 0.0);
+    light_.ambient = glm::vec4(0.2, 0.2, 0.2, 1.0);
 
 
     glClearColor(0.81f, 0.81f, 0.8f, 1.0f);
@@ -91,10 +92,11 @@ void SimpleShapeApplication::setLightUniformBufferData() const {
     glGenBuffers(1, &ubo_handle);
     glBindBuffer(GL_UNIFORM_BUFFER, ubo_handle);
 
-    glBufferData(GL_UNIFORM_BUFFER, 3 * sizeof(light_.position), nullptr, GL_STATIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, 4 * sizeof(light_.position), nullptr, GL_STATIC_DRAW);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(light_.position), &light_.position);
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof(light_.position), sizeof(light_.position), &light_.color);
     glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(light_.position), sizeof(light_.position), &light_.a);
+    glBufferSubData(GL_UNIFORM_BUFFER, 3 * sizeof(light_.position), sizeof(light_.position), &light_.ambient);
 
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
     glBindBufferBase(GL_UNIFORM_BUFFER, 2, ubo_handle);

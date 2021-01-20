@@ -9,6 +9,7 @@ layout(std140) uniform Light {
     vec3 position_in_vs;
     vec3 color;
     vec3 a;
+    vec3 ambient;
 } light;
 
 uniform sampler2D diffuse_map;
@@ -28,6 +29,7 @@ void main() {
 
     vec4 diffuse_color = texture(diffuse_map, vertex_color);
     vFragColor.a = diffuse_color.a;
-    vFragColor.rgb = light_in * diffuse_color.rgb*light.color;
 
+    vFragColor.rgb = diffuse_color.rgb*light.ambient.rgb;
+    vFragColor.rgb += light_in * diffuse_color.rgb * light.color;
 }
