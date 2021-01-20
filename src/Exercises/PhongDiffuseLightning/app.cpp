@@ -31,9 +31,9 @@ void SimpleShapeApplication::init() {
     set_controler(new CameraControler(camera()));
     quad = new Quad();
 
-    light_.position = glm::vec4(-10.0, 10.0, 10.0, 1.0);
+    light_.position = glm::vec4(0.0, 2.0, 0.0, 1.0);
     light_.color = glm::vec4(1.0, 1.0, 1.0, 1.0);
-    //light_.a = glm::vec4(0.0, 0.0, 0.0, 1.0);
+    light_.a = glm::vec4(0.3, 0.3, 0.0, 0.0);
 
 
     glClearColor(0.81f, 0.81f, 0.8f, 1.0f);
