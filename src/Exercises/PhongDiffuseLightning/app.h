@@ -18,6 +18,12 @@
 
 #include "quad.h"
 
+struct Light {
+    glm::vec4 position;
+    glm::vec4 color;
+    glm::vec4 a;
+};
+
 class SimpleShapeApplication : public xe::Application {
 public:
     SimpleShapeApplication(int width, int height, std::string title, int major = 4, int minor = 1) :
@@ -49,11 +55,14 @@ public:
 private:
     GLuint vao_;
     GLuint u_pvm_buffer_;
+    GLint u_light_location;
     Camera *camera_;
     CameraControler *controler_;
     unsigned int program_;
     Quad *quad;
+    Light light_;
 
     void preparePVM();
     void setPVMUniformBufferData() const;
+    void setLightUniformBufferData() const;
 };

@@ -31,18 +31,9 @@ void SimpleShapeApplication::init() {
     set_controler(new CameraControler(camera()));
     quad = new Quad();
 
-    // uniforms
-    float strength = 0.3f;
-    float light[3] = {0.6, 0.4, 0.6};
-
-    GLuint ubo_handle(0u);
-    glGenBuffers(1, &ubo_handle);
-    glBindBuffer(GL_UNIFORM_BUFFER, ubo_handle);
-    glBufferData(GL_UNIFORM_BUFFER, 8 * sizeof(float), nullptr, GL_STATIC_DRAW);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(float), &strength);
-    glBufferSubData(GL_UNIFORM_BUFFER, 4 * sizeof(float), 3 * sizeof(float), light);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubo_handle);
+    light_.position = glm::vec4(-10.0, 10.0, 10.0, 1.0);
+    light_.color = glm::vec4(1.0, 1.0, 1.0, 1.0);
+    //light_.a = glm::vec4(0.0, 0.0, 0.0, 1.0);
 
 
     glClearColor(0.81f, 0.81f, 0.8f, 1.0f);
@@ -53,13 +44,6 @@ void SimpleShapeApplication::init() {
     glEnable(GL_DEPTH_TEST);
     glUseProgram(program);
 
-    auto u_modifiers_index = glGetUniformBlockIndex(program, "Modifiers");
-    if (u_modifiers_index == GL_INVALID_INDEX) {
-        std::cout << "Cannot find Modifiers uniform block in program" << std::endl;
-    } else {
-        glUniformBlockBinding(program, u_modifiers_index, 0);
-    }
-
     preparePVM();
 
     auto u_diffuse_map_location = glGetUniformLocation(program, "diffuse_map");
@@ -69,10 +53,14 @@ void SimpleShapeApplication::init() {
         glUniform1ui(u_diffuse_map_location, 0);
     }
 
+    u_light_location = glGetUniformBlockIndex(program, "Light");
+    if (u_light_location == -1) {
+        std::cerr << "Cannot find uniform Light\n";
+    }
 }
 
 void SimpleShapeApplication::preparePVM() {
-    glm::vec3 eye = glm::vec3(-3.0, 1.0, -3.0); // pos of camera
+    glm::vec3 eye = glm::vec3(-3.0, 3.0, -3.0); // pos of camera
     glm::vec3 center = glm::vec3(0.0, 0.0, 0.0); // where camera looks at
     glm::vec3 up = glm::vec3(0.0, 1.0, 0.0); // what is 'up' axis for camera
     camera()->look_at(eye, center, up);
@@ -94,7 +82,24 @@ void SimpleShapeApplication::preparePVM() {
 
 void SimpleShapeApplication::frame() {
     setPVMUniformBufferData();
+    setLightUniformBufferData();
     quad->draw();
+}
+
+void SimpleShapeApplication::setLightUniformBufferData() const {
+    unsigned int ubo_handle(1u);
+    glGenBuffers(1, &ubo_handle);
+    glBindBuffer(GL_UNIFORM_BUFFER, ubo_handle);
+
+    glBufferData(GL_UNIFORM_BUFFER, 3 * sizeof(light_.position), nullptr, GL_STATIC_DRAW);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(light_.position), &light_.position);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(light_.position), sizeof(light_.position), &light_.color);
+    glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(light_.position), sizeof(light_.position), &light_.a);
+
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 2, ubo_handle);
+
+    glUniformBlockBinding(program_, u_light_location, 2);
 }
 
 void SimpleShapeApplication::setPVMUniformBufferData() const {
