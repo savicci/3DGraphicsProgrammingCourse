@@ -25,36 +25,16 @@ Quad::Quad() {
     glBindTexture(GL_TEXTURE_2D, 0);
 
     std::vector<GLfloat> vertices{
-            //x    y      z      u     v     nx    ny    nz
-            -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-            -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-            -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-            -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+             1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+             1.0f,  1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+
     };
 
     unsigned int indices[] = {
-            // bottom
             0,1,2,
-            1,3,2,
-            //left
-            0,4,2,
-            2,4,6,
-            //right
-            1,3,5,
-            3,7,5,
-            //behind
-            3,2,7,
-            2,6,7,
-            //front
-            0,1,4,
-            1,5,4,
-            //up
-            4,5,6,
-            5,7,6
+            0,2,3
     };
 
     glGenBuffers(1, &buffer_[0]);
@@ -102,7 +82,7 @@ void Quad::draw() {
     glBindTexture(GL_TEXTURE_2D,diffuse_texture_);
 
     glBindVertexArray(vao_);
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (void *) nullptr);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *) nullptr);
     glEnable(GL_DEPTH_TEST);
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
