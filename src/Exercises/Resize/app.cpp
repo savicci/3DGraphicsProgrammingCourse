@@ -158,6 +158,16 @@ void SimpleShapeApplication::preparePVM(GLuint program) {
     } else {
         glUniformBlockBinding(program, u_pvm_buffer_, 1);
     }
+
+    glGenBuffers(1, &pvm_handle);
+    glBindBuffer(GL_UNIFORM_BUFFER, pvm_handle);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, pvm_handle);
+    glUniformBlockBinding(program, u_pvm_buffer_, 1);
+
+    glBindBuffer(GL_UNIFORM_BUFFER, pvm_handle);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(PVM), &PVM[0]);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void SimpleShapeApplication::frame() {

@@ -36,6 +36,7 @@ private:
     glm::mat4 V_;
 
     GLuint u_pvm_buffer_;
+    GLuint pvm_handle;
 
     void preparePVM(GLuint program);
 };
