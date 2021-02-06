@@ -42,6 +42,7 @@ public:
 private:
     GLuint vao_;
     GLuint u_pvm_buffer_;
+    GLuint pvm_handle;
     Camera *camera_;
     unsigned int program_;
 
