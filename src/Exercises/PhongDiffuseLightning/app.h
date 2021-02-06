@@ -56,6 +56,7 @@ public:
 private:
     GLuint vao_;
     GLuint u_pvm_buffer_;
+    GLuint pvm_handle;
     GLint u_light_location;
     Camera *camera_;
     CameraControler *controler_;

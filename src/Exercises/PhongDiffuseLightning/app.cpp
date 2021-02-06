@@ -79,6 +79,12 @@ void SimpleShapeApplication::preparePVM() {
     if (u_pvm_buffer_ == GL_INVALID_INDEX) {
         std::cout << "Cannot find Transformations uniform block in program" << std::endl;
     }
+
+    glGenBuffers(1, &pvm_handle);
+    glBindBuffer(GL_UNIFORM_BUFFER, pvm_handle);
+    glBufferData(GL_UNIFORM_BUFFER, 3 * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, pvm_handle);
+    glUniformBlockBinding(program_, u_pvm_buffer_, 1);
 }
 
 void SimpleShapeApplication::frame() {
@@ -111,10 +117,7 @@ void SimpleShapeApplication::setPVMUniformBufferData() const {
     auto R = glm::mat3(VM);
     auto N = glm::transpose(glm::inverse(R));
 
-    unsigned int ubo_handle(1u);
-    glGenBuffers(1, &ubo_handle);
-    glBindBuffer(GL_UNIFORM_BUFFER, ubo_handle);
-    glBufferData(GL_UNIFORM_BUFFER, 3 * sizeof(P), nullptr, GL_STATIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, pvm_handle);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(P), &P[0]);
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof(P), sizeof(VM), &VM[0]);
 
@@ -123,7 +126,7 @@ void SimpleShapeApplication::setPVMUniformBufferData() const {
     glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(P) + 2 * sizeof(N[0]), sizeof(N[2]), &N[2]);
 
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubo_handle);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, pvm_handle);
 
     glUniformBlockBinding(program_, u_pvm_buffer_, 1);
 }
