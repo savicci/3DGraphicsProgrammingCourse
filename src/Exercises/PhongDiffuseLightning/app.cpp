@@ -58,6 +58,11 @@ void SimpleShapeApplication::init() {
     if (u_light_location == -1) {
         std::cerr << "Cannot find uniform Light\n";
     }
+
+    glGenBuffers(1, &light_handle);
+    glBindBuffer(GL_UNIFORM_BUFFER, light_handle);
+    glBufferData(GL_UNIFORM_BUFFER, 4 * sizeof(light_.position), nullptr, GL_STATIC_DRAW);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 2, light_handle);
 }
 
 void SimpleShapeApplication::preparePVM() {
@@ -94,18 +99,12 @@ void SimpleShapeApplication::frame() {
 }
 
 void SimpleShapeApplication::setLightUniformBufferData() const {
-    unsigned int ubo_handle(1u);
-    glGenBuffers(1, &ubo_handle);
-    glBindBuffer(GL_UNIFORM_BUFFER, ubo_handle);
-
-    glBufferData(GL_UNIFORM_BUFFER, 4 * sizeof(light_.position), nullptr, GL_STATIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, light_handle);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(light_.position), &light_.position);
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof(light_.position), sizeof(light_.position), &light_.color);
     glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(light_.position), sizeof(light_.position), &light_.a);
     glBufferSubData(GL_UNIFORM_BUFFER, 3 * sizeof(light_.position), sizeof(light_.position), &light_.ambient);
-
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    glBindBufferBase(GL_UNIFORM_BUFFER, 2, ubo_handle);
 
     glUniformBlockBinding(program_, u_light_location, 2);
 }
