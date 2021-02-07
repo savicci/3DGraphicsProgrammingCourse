@@ -31,9 +31,8 @@ void SimpleShapeApplication::init() {
     set_controler(new CameraControler(camera()));
     quad = new Quad();
 
-    light_.position = glm::vec4(0.0, 0.0, 1.0, 1.0);
     light_.color = glm::vec4(1.0, 1.0, 1.0, 1.0);
-    light_.a = glm::vec4(0.3, 0.3, 0.0, 0.0);
+    light_.a = glm::vec4(1.0, 0.0, 1.0, 0.0);
     light_.ambient = glm::vec4(0.2, 0.2, 0.2, 1.0);
 
 
@@ -66,7 +65,7 @@ void SimpleShapeApplication::init() {
 }
 
 void SimpleShapeApplication::preparePVM() {
-    glm::vec3 eye = glm::vec3(-3.0, 3.0, -3.0); // pos of camera
+    glm::vec3 eye = glm::vec3(-0.5, 0.2, -3.0); // pos of camera
     glm::vec3 center = glm::vec3(0.0, 0.0, 0.0); // where camera looks at
     glm::vec3 up = glm::vec3(0.0, 1.0, 0.0); // what is 'up' axis for camera
     camera()->look_at(eye, center, up);
@@ -98,7 +97,9 @@ void SimpleShapeApplication::frame() {
     quad->draw();
 }
 
-void SimpleShapeApplication::setLightUniformBufferData() const {
+void SimpleShapeApplication::setLightUniformBufferData() {
+    light_.position = camera_->view() * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+
     glBindBuffer(GL_UNIFORM_BUFFER, light_handle);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(light_.position), &light_.position);
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof(light_.position), sizeof(light_.position), &light_.color);

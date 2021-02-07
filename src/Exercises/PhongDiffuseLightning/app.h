@@ -67,5 +67,5 @@ private:
 
     void preparePVM();
     void setPVMUniformBufferData() const;
-    void setLightUniformBufferData() const;
+    void setLightUniformBufferData();
 };
