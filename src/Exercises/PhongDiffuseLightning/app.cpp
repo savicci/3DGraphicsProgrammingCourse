@@ -65,7 +65,7 @@ void SimpleShapeApplication::init() {
 }
 
 void SimpleShapeApplication::preparePVM() {
-    glm::vec3 eye = glm::vec3(-0.5, 0.2, -3.0); // pos of camera
+    glm::vec3 eye = glm::vec3(-0.5, 0.2, 3.0); // pos of camera
     glm::vec3 center = glm::vec3(0.0, 0.0, 0.0); // where camera looks at
     glm::vec3 up = glm::vec3(0.0, 1.0, 0.0); // what is 'up' axis for camera
     camera()->look_at(eye, center, up);
@@ -122,8 +122,8 @@ void SimpleShapeApplication::setPVMUniformBufferData() const {
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof(P), sizeof(VM), &VM[0]);
 
     glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(P), sizeof(N[0]), &N[0]);
-    glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(P) + sizeof(N[0]), sizeof(N[1]), &N[1]);
-    glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(P) + 2 * sizeof(N[0]), sizeof(N[2]), &N[2]);
+    glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(P) + sizeof(glm::vec4), sizeof(N[1]), &N[1]);
+    glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(P) + 2 * sizeof(glm::vec4), sizeof(N[2]), &N[2]);
 
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
     glBindBufferBase(GL_UNIFORM_BUFFER, 1, pvm_handle);
