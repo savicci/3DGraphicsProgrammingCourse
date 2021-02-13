@@ -37,6 +37,8 @@ private:
 
     GLuint u_pvm_buffer_;
     GLuint pvm_handle;
+    unsigned int program_;
 
     void preparePVM(GLuint program);
+    void setPVMUniformBufferData(const glm::mat4 &PVM) const;
 };

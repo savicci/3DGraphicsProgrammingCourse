@@ -26,6 +26,8 @@ void SimpleShapeApplication::init() {
         std::cerr << std::string(PROJECT_DIR) + "/shaders/base_fs.glsl" << " shader files" << std::endl;
     }
 
+    program_ = program;
+
     std::vector<GLfloat> vertices{
             // front
             -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
@@ -164,19 +166,22 @@ void SimpleShapeApplication::preparePVM(GLuint program) {
     glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
     glBindBufferBase(GL_UNIFORM_BUFFER, 1, pvm_handle);
     glUniformBlockBinding(program, u_pvm_buffer_, 1);
-
-    glBindBuffer(GL_UNIFORM_BUFFER, pvm_handle);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(PVM), &PVM[0]);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void SimpleShapeApplication::frame() {
     glm::mat4 PVM = P_ * V_;
+    setPVMUniformBufferData(PVM);
 
     glBindVertexArray(vao_);
     glEnable(GL_DEPTH_TEST);
     glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, (void *) nullptr);
     glBindVertexArray(0);
+}
+
+void SimpleShapeApplication::setPVMUniformBufferData(const glm::mat4 &PVM) const {
+    glBindBuffer(GL_UNIFORM_BUFFER, pvm_handle);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(PVM), &PVM[0]);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void SimpleShapeApplication::framebuffer_resize_callback(int w, int h) {
