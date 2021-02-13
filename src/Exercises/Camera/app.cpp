@@ -149,6 +149,12 @@ void SimpleShapeApplication::preparePVM() {
     if (u_pvm_buffer_ == GL_INVALID_INDEX) {
         std::cout << "Cannot find PVM uniform block in program" << std::endl;
     }
+
+    glGenBuffers(1, &pvm_handle);
+    glBindBuffer(GL_UNIFORM_BUFFER, pvm_handle);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, pvm_handle);
+    glUniformBlockBinding(program_, u_pvm_buffer_, 1);
 }
 
 void SimpleShapeApplication::frame() {
@@ -162,15 +168,9 @@ void SimpleShapeApplication::frame() {
 }
 
 void SimpleShapeApplication::setPVMUniformBufferData(const glm::mat4 &PVM) const {
-    unsigned int ubo_handle(1u);
-    glGenBuffers(1, &ubo_handle);
-    glBindBuffer(GL_UNIFORM_BUFFER, ubo_handle);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(PVM), nullptr, GL_STATIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, pvm_handle);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(PVM), &PVM[0]);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    glBindBufferBase(GL_UNIFORM_BUFFER, 1, ubo_handle);
-
-    glUniformBlockBinding(program_, u_pvm_buffer_, 1);
 }
 
 void SimpleShapeApplication::framebuffer_resize_callback(int w, int h) {
